@@ -1,4 +1,9 @@
+aws-lambda-context
+aws-lambda-powertools
+aws-xray-sdk
 boto3
+boto3-stubs
+dataclasses_json
 mdformat
 mdformat-gfm
 mdformat-black
