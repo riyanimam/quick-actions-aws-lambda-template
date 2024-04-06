@@ -1,0 +1,54 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.3.5
+  hooks:
+    # Run the linter.
+    - id: ruff
+      name: Python Linter
+      require_serial: true
+      args: [python/, --fix]
+    # Run the formatter.
+    - id: ruff-format
+      name: Python Formatter
+      require_serial: true
+      types: [python]
+      args: [python/]
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.86.0
+  hooks:
+    - id: terraform_fmt
+      name: Terraform Formatter
+      require_serial: true
+      args:
+      - --args=-recursive
+- repo: https://github.com/adroemverge/yamllint
+  rev: v1.33.0
+  hooks:
+    - id: yamllint
+      name: YAML Linter
+      require_serial: true
+      types: [yaml]
+      args: [-c=./config/.yamllint.yaml]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.12.0
+  hooks:
+  - id: pretty-format-yaml
+    name: YAML Formatter
+    require_serial: true
+    args: [--autofix]
+  - id: pretty-format-toml
+    name: TOML Formatter
+    require_serial: true
+    args: [--autofix]
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.17
+  hooks:
+  - id: mdformat
+    name: Markdown Formatter
+    require_serial: true
+    args: [documentation/.]
+    additional_dependencies:
+    - mdformat-gfm
+    - mdformat-black
+    

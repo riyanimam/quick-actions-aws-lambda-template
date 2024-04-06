@@ -1,0 +1,17 @@
+boto3
+mdformat
+mdformat-gfm
+mdformat-black
+mock
+moto
+pre-commit
+py-ulid
+pyright
+pytest
+requests
+responses
+ruff
+urllib3
+pydantic
+yamllint
+xmltodict
