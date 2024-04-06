@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
+
   python_lint:
     runs-on: ubuntu-latest
     steps:
@@ -16,6 +17,7 @@ jobs:
       run: |
         pip install -r python/test/requirements.txt
         ruff check python/
+
   python_format:
     runs-on: ubuntu-latest
     steps:
@@ -24,4 +26,36 @@ jobs:
       run: |
         pip install -r python/test/requirements.txt
         ruff format python/ --check
+
+  terraform_format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Terraform Format
+      run: |
+        terraform fmt terraform/ -check
+
+  yaml_lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: YAML Lint
+      run: |
+        pip install -r python/test/requirements.txt
+
+  yaml_format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: YAML Format
+      run: |
+        pip install -r python/test/requirements.txt
+
+  markdown_format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Markdown Format
+      run: |
+        pip install -r python/test/requirements.txt
   
