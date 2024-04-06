@@ -1,0 +1,7 @@
+extends: relaxed
+
+rules:
+  line-length:
+    max: 500
+    level: warning
+  new-lines: disable

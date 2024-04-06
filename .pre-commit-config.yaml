@@ -4,32 +4,32 @@ repos:
   rev: v0.3.5
   hooks:
     # Run the linter.
-    - id: ruff
-      name: Python Linter
-      require_serial: true
-      args: [python/, --fix]
+  - id: ruff
+    name: Python Linter
+    require_serial: true
+    args: [python/, --fix]
     # Run the formatter.
-    - id: ruff-format
-      name: Python Formatter
-      require_serial: true
-      types: [python]
-      args: [python/]
+  - id: ruff-format
+    name: Python Formatter
+    require_serial: true
+    types: [python]
+    args: [python/]
 - repo: https://github.com/antonbabenko/pre-commit-terraform
   rev: v1.86.0
   hooks:
-    - id: terraform_fmt
-      name: Terraform Formatter
-      require_serial: true
-      args:
-      - --args=-recursive
-- repo: https://github.com/adroemverge/yamllint
+  - id: terraform_fmt
+    name: Terraform Formatter
+    require_serial: true
+    args:
+    - --args=-recursive
+- repo: https://github.com/adrienverge/yamllint
   rev: v1.33.0
   hooks:
-    - id: yamllint
-      name: YAML Linter
-      require_serial: true
-      types: [yaml]
-      args: [-c=./config/.yamllint.yaml]
+  - id: yamllint
+    name: YAML Linter
+    require_serial: true
+    types: [yaml]
+    args: [-c=./config/.yamllint.yaml]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.12.0
   hooks:
@@ -51,4 +51,3 @@ repos:
     additional_dependencies:
     - mdformat-gfm
     - mdformat-black
-    
