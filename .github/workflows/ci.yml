@@ -8,53 +8,68 @@ on:
   workflow_dispatch:
 
 jobs:
-  python_lint:
+  code-quality:
+    name: Code Quality
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Python Lint
-      run: |
-        pip install -r python/test/requirements.txt
-        ruff check python/
 
-  python_format:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Python dependencies
+      run: pip install ruff ruff-lsp
+
+    - name: Lint Python with Ruff
+      run: ruff check python/
+
+    - name: Check Python formatting with Ruff Format
+      run: ruff format python/ --check
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Check Terraform formatting
+      run: terraform fmt terraform/ -check
+
+    - name: Install yamllint and toml
+      run: pip install yamllint toml
+
+    - name: Lint TOML files
+      run: |
+        for file in $(find . -name "*.toml"); do
+          python -c "import toml; toml.load(open('$file'))" || exit 1
+        done
+
+    - name: Lint YAML files
+      run: yamllint .
+
+    - name: Format YAML files (check only)
+      run: echo "No standard YAML formatter in check mode; skipping."
+
+    - name: Format Markdown files (check only)
+      run: |
+        pip install mdformat
+        mdformat --check .
+
+  terraform:
+    name: Terraform
     runs-on: ubuntu-latest
+    needs: code-quality
     steps:
     - uses: actions/checkout@v3
-    - name: Python Format
-      run: |
-        pip install -r python/test/requirements.txt
-        ruff format python/ --check
 
-  terraform_format:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Terraform Format
-      run: |
-        terraform fmt terraform/ -check
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
 
-  yaml_lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: YAML Lint
-      run: |
-        pip install -r python/test/requirements.txt
+    - name: Terraform Init
+      run: terraform -chdir=terraform/ init
 
-  yaml_format:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: YAML Format
-      run: |
-        pip install -r python/test/requirements.txt
+    - name: Terraform Plan
+      run: terraform -chdir=terraform/ plan
 
-  markdown_format:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Markdown Format
-      run: |
-        pip install -r python/test/requirements.txt
-
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform -chdir=terraform/ apply -auto-approve
