@@ -1,36 +1,75 @@
-# This is a basic workflow to help you get started with Actions
+name: quick-actions-aws-lambda-template-ci
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  code-quality:
+    name: Code Quality
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: echo Hello, world!
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-      # Runs a set of commands using the runners shell
-    - name: Run a multi-line script
+    - name: Install Python dependencies
+      run: pip install ruff ruff-lsp
+
+    - name: Lint Python with Ruff
+      run: ruff check python/
+
+    - name: Check Python formatting with Ruff Format
+      run: ruff format python/ --check
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Check Terraform formatting
+      run: terraform fmt terraform/ -check
+
+    - name: Install yamllint and toml
+      run: pip install yamllint toml
+
+    - name: Lint TOML files
       run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        for file in $(find . -name "*.toml"); do
+          python -c "import toml; toml.load(open('$file'))" || exit 1
+        done
+
+    - name: Lint YAML files
+      run: yamllint . -c=./config/.yamllint.yaml
+
+    - name: Format YAML files (check only)
+      run: echo "No standard YAML formatter in check mode; skipping."
+
+    - name: Format Markdown files (check only)
+      run: |
+        pip install mdformat
+        mdformat --check .
+
+  # terraform:
+  #   name: Terraform
+  #   runs-on: ubuntu-latest
+  #   needs: code-quality
+  #   steps:
+  #   - uses: actions/checkout@v3
+
+  #   - name: Set up Terraform
+  #     uses: hashicorp/setup-terraform@v3
+
+  #   - name: Terraform Init
+  #     run: terraform -chdir=terraform/ init
+
+  #   - name: Terraform Plan
+  #     run: terraform -chdir=terraform/ plan
+
+  #   - name: Terraform Apply
+  #     if: github.ref == 'refs/heads/main'
+  #     run: terraform -chdir=terraform/ apply -auto-approve

@@ -1,0 +1,10 @@
+node_modules
+/.nova
+.DS_Store
+package-lock.json
+.venv
+.pytest_cache
+.ruff_cache
+.vscode
+# Ignore Python bytecode files
+__pycache__/
