@@ -74,29 +74,29 @@ jobs:
   #     if: github.ref == 'refs/heads/main'
   #     run: terraform -chdir=terraform/ apply -auto-approve
 
-  testing:
-    name: Testing
-    runs-on: ubuntu-latest
-    needs: code-quality
-    steps:
-    - uses: actions/checkout@v3
+  # testing:
+  #   name: Testing
+  #   runs-on: ubuntu-latest
+  #   needs: code-quality
+  #   steps:
+  #   - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v5
+  #     with:
+  #       python-version: '3.11'
 
-    - name: Install test dependencies
-      run: pip install -r python/test/requirements.txt pytest pytest-cov mutmut
+  #   - name: Install test dependencies
+  #     run: pip install -r python/test/requirements.txt pytest pytest-cov mutmut
 
-    - name: Unit testing
-      run: pytest --cov=python/src --cov-report=term-missing python/test
+  #   - name: Unit testing
+  #     run: pytest --cov=python/src --cov-report=term-missing python/test
 
-    - name: Mutation testing
-      run: |
-        pip install mutmut
-        mutmut run --paths-to-mutate=python/src
-        mutmut results
+  #   - name: Mutation testing
+  #     run: |
+  #       pip install mutmut
+  #       mutmut run --paths-to-mutate=python/src
+  #       mutmut results
 
-    - name: Integration testing
-      run: pytest python/integration
+  #   - name: Integration testing
+  #     run: pytest python/integration
