@@ -4,7 +4,6 @@ aws-xray-sdk
 boto3
 boto3-stubs
 dataclasses_json
-json
 mdformat
 mdformat-gfm
 mdformat-black

@@ -33,13 +33,20 @@ ______________________________________________________________________
 
 ## Lambda Function
 
-The Lambda function (`base_lambda.py`) provides utility actions via AWS APIs:
+The Lambda function (`base_lambda.py`) provides utility actions via AWS APIs for a wide range of AWS services.\
+Each action is implemented as a dedicated function, and the handler dispatches based on the event key.
 
-- Delete another Lambda function
-- Redrive messages from an SQS DLQ
-- Get ECR login and repository URI
+**Supported actions:**
 
-The handler expects an event with a key indicating the action to perform.
+- Lambda: `delete_lambda_function`, `list_lambda_functions`
+- SQS: `redrive_sqs_dlq`, `send_sqs_message`
+- ECR: `get_ecr_login_and_repo_uri`, `list_ecr_repositories`
+- ECS Fargate: `list_ecs_clusters`, `run_fargate_task`
+- DynamoDB: `put_dynamodb_item`, `query_dynamodb`
+- CloudWatch: `put_cloudwatch_metric`, `get_cloudwatch_metric_statistics`
+- SNS: `publish_sns_message`, `list_sns_topics`
+- S3: `upload_file_to_s3`, `list_s3_objects`
+- Glue: `start_glue_job`, `get_glue_job_run`
 
 ______________________________________________________________________
 
@@ -129,13 +136,35 @@ The Lambda function expects an event with a key indicating the action, for examp
 }
 ```
 
-Supported events:
+**Supported events:**
 
 - `delete_lambda_function`
 - `redrive_sqs_dlq`
 - `get_ecr_login_and_repo_uri`
+- `list_lambda_functions`
+- `list_ecr_repositories`
+- `list_ecs_clusters`
+- `run_fargate_task`
+- `put_dynamodb_item`
+- `query_dynamodb`
+- `put_cloudwatch_metric`
+- `get_cloudwatch_metric_statistics`
+- `publish_sns_message`
+- `list_sns_topics`
+- `upload_file_to_s3`
+- `list_s3_objects`
+- `start_glue_job`
+- `get_glue_job_run`
 
-Update the Lambda code to handle your specific use cases.
+**Example event for running a Fargate task:**
+
+```json
+{
+  "body": "{\"event\": \"run_fargate_task\", \"cluster\": \"my-cluster\", \"task_definition\": \"my-task-def\", \"subnets\": [\"subnet-xxxxxx\"]}"
+}
+```
+
+Update the Lambda code or event payloads to handle your specific use cases.
 
 ______________________________________________________________________
 

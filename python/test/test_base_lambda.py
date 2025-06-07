@@ -4,6 +4,7 @@ import json
 import src.base_lambda as base_lambda
 
 
+# Lambda
 @mock.patch("src.base_lambda.boto3.client")
 def test_delete_lambda_function_calls_boto3(mock_boto_client):
     mock_lambda = mock.Mock()
@@ -20,6 +21,20 @@ def test_delete_lambda_function_calls_boto3(mock_boto_client):
     assert resp == {"ResponseMetadata": {"HTTPStatusCode": 204}}
 
 
+@mock.patch("src.base_lambda.boto3.client")
+def test_list_lambda_functions(mock_boto_client):
+    mock_lambda = mock.Mock()
+    mock_boto_client.return_value = mock_lambda
+    mock_lambda.list_functions.return_value = {"Functions": []}
+    resp = base_lambda.list_lambda_functions()
+    mock_boto_client.assert_called_once_with(
+        "lambda", config=base_lambda.aws_client_config
+    )
+    mock_lambda.list_functions.assert_called_once_with()
+    assert resp == {"Functions": []}
+
+
+# SQS
 @mock.patch("src.base_lambda.boto3.client")
 def test_redrive_sqs_dlq_moves_messages(mock_boto_client):
     mock_sqs = mock.Mock()
@@ -60,6 +75,22 @@ def test_redrive_sqs_dlq_no_messages(mock_boto_client):
 
 
 @mock.patch("src.base_lambda.boto3.client")
+def test_send_sqs_message(mock_boto_client):
+    mock_sqs = mock.Mock()
+    mock_boto_client.return_value = mock_sqs
+    mock_sqs.send_message.return_value = {"MessageId": "abc"}
+    resp = base_lambda.send_sqs_message("queue_url", "msg")
+    mock_boto_client.assert_called_once_with(
+        "sqs", config=base_lambda.aws_client_config
+    )
+    mock_sqs.send_message.assert_called_once_with(
+        QueueUrl="queue_url", MessageBody="msg"
+    )
+    assert resp == {"MessageId": "abc"}
+
+
+# ECR
+@mock.patch("src.base_lambda.boto3.client")
 def test_get_ecr_login_and_repo_uri(mock_boto_client):
     mock_ecr = mock.Mock()
     mock_boto_client.return_value = mock_ecr
@@ -82,40 +113,76 @@ def test_get_ecr_login_and_repo_uri(mock_boto_client):
     }
 
 
+@mock.patch("src.base_lambda.boto3.client")
+def test_list_ecr_repositories(mock_boto_client):
+    mock_ecr = mock.Mock()
+    mock_boto_client.return_value = mock_ecr
+    mock_ecr.describe_repositories.return_value = {"repositories": []}
+    resp = base_lambda.list_ecr_repositories()
+    mock_boto_client.assert_called_once_with(
+        "ecr", config=base_lambda.aws_client_config
+    )
+    mock_ecr.describe_repositories.assert_called_once_with()
+    assert resp == {"repositories": []}
+
+
+# Lambda handler dispatch
 @mock.patch("src.base_lambda.delete_lambda_function")
 @mock.patch("src.base_lambda.json")
 def test_lambda_handler_delete_lambda_function(mock_json, mock_delete):
-    payload = {"body": json.dumps("delete_lambda_function")}
-    mock_json.loads.return_value = "delete_lambda_function"
+    payload = {
+        "body": json.dumps(
+            {"event": "delete_lambda_function", "function_name": "my-func"}
+        )
+    }
+    mock_json.loads.return_value = {
+        "event": "delete_lambda_function",
+        "function_name": "my-func",
+    }
     context = mock.Mock()
     base_lambda.lambda_handler(payload, context)
-    mock_delete.assert_called_once_with("function_name_here")
+    mock_delete.assert_called_once_with("my-func")
 
 
 @mock.patch("src.base_lambda.redrive_sqs_dlq")
 @mock.patch("src.base_lambda.json")
 def test_lambda_handler_redrive_sqs_dlq(mock_json, mock_redrive):
-    payload = {"body": json.dumps("redrive_sqs_dlq")}
-    mock_json.loads.return_value = "redrive_sqs_dlq"
+    payload = {
+        "body": json.dumps(
+            {"event": "redrive_sqs_dlq", "source_queue_url": "src", "dlq_url": "dlq"}
+        )
+    }
+    mock_json.loads.return_value = {
+        "event": "redrive_sqs_dlq",
+        "source_queue_url": "src",
+        "dlq_url": "dlq",
+    }
     context = mock.Mock()
     base_lambda.lambda_handler(payload, context)
-    mock_redrive.assert_called_once_with("source_queue_url_here", "dlq_url_here")
+    mock_redrive.assert_called_once_with("src", "dlq_url_here")
 
 
 @mock.patch("src.base_lambda.get_ecr_login_and_repo_uri")
 @mock.patch("src.base_lambda.json")
 def test_lambda_handler_get_ecr_login_and_repo_uri(mock_json, mock_get_ecr):
-    payload = {"body": json.dumps("get_ecr_login_and_repo_uri")}
-    mock_json.loads.return_value = "get_ecr_login_and_repo_uri"
+    payload = {
+        "body": json.dumps(
+            {"event": "get_ecr_login_and_repo_uri", "repository_name": "repo"}
+        )
+    }
+    mock_json.loads.return_value = {
+        "event": "get_ecr_login_and_repo_uri",
+        "repository_name": "repo",
+    }
     context = mock.Mock()
     base_lambda.lambda_handler(payload, context)
-    mock_get_ecr.assert_called_once_with("repository_name_here")
+    mock_get_ecr.assert_called_once_with("repo")
 
 
 @mock.patch("src.base_lambda.json")
 def test_lambda_handler_invalid_event(mock_json):
-    payload = {"body": json.dumps("unknown_event")}
-    mock_json.loads.return_value = "unknown_event"
+    payload = {"body": json.dumps({"event": "unknown_event"})}
+    mock_json.loads.return_value = {"event": "unknown_event"}
     context = mock.Mock()
     result = base_lambda.lambda_handler(payload, context)
     assert result == "Invalid or no event received"
