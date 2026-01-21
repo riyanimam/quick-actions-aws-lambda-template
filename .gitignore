@@ -6,5 +6,31 @@ package-lock.json
 .pytest_cache
 .ruff_cache
 .vscode
+.mypy_cache/
 # Ignore Python bytecode files
 __pycache__/
+*.py[cod]
+*.egg-info/
+*.eggs/
+dist/
+build/
+.eggs/
+# Ignore Terraform directories and files
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+.tfvars
+.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# Ignore IDE and OS files
+.env
+.env.local
+*.swp
+*.swo
+*~
+.idea/
+*.iml
