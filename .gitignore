@@ -8,3 +8,14 @@ package-lock.json
 .vscode
 # Ignore Python bytecode files
 __pycache__/
+# Ignore Terraform directories and files
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+.tfvars
+.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
